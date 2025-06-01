@@ -23,10 +23,11 @@ class CryptoBuddy:
                 "market_cap": "medium",
                 "energy_use": "low",
                 "sustainability_score": 8
-            }
+                }
         }
         # Step 3 - The Chatbot's Logic
     def respond(self, user_query):
+        try:
             user_query = user_query.lower().strip()
 
             if 'hello' in user_query or 'hi' in user_query:
@@ -65,7 +66,8 @@ class CryptoBuddy:
                      return f"{', '.join(green_cryptos)} is super eco-friendly and a great sustainable option!"
                 else:
                   return "None of the coins meet high sustainability and low energy use together right now."
-                
+        except Exception as e:
+            return f"Oops! Something went wrong: {str(e)}"        
 bot = CryptoBuddy()
 print(bot.greetings)
 
