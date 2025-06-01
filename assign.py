@@ -2,7 +2,17 @@
 class CryptoBuddy:
     def __init__(self):
         self.greetings = "Hello! How can I assist you with cryptocurrency today?"
-        self.unknown_response = "Sorry not sure how to resspond to that."
+        self.unknown_response = "Sorry not sure how to respond to that."
+
+# Add this list of random disclaimers
+        self.disclaimers = [
+        "Remember: Cryptocurrency investments are volatile and risky.",
+        "Disclaimer⚠️: This is not financial advice. Always do your own research.",
+        "Note: Past performance doesn't guarantee future results.",
+        "Warning⚠️: Never invest more than you can afford to lose.",
+        "Important: Cryptocurrency regulations vary by region.",
+        "FYI: The crypto market can be highly unpredictable."
+          ]
 
         # Step 2 - Predefined Crypto Data
         self.crypto_db = {
@@ -25,49 +35,77 @@ class CryptoBuddy:
                 "sustainability_score": 8
                 }
         }
+
+    def get_random_disclaimer(self):
+        import random
+        return random.choice(self.disclaimers)
+
         # Step 3 - The Chatbot's Logic
     def respond(self, user_query):
         try:
             user_query = user_query.lower().strip()
-
+            responses = []  # Store all matching responses
+        
+        # 1. Greeting check
             if 'hello' in user_query or 'hi' in user_query:
-                return self.greetings
+                responses.append(f"{self.greetings}")
+            
+            # 2. Combined query check
+            if ('trending' in user_query or 'rising' in user_query) and \
+            ('sustainable' in user_query or 'eco' in user_query or 'green' in user_query):
+                trending_sustainable = [
+                    name for name, data in self.crypto_db.items()
+                    if data['price_trend'] == 'rising' and data['sustainability_score'] >= 6
+                ]
+                if trending_sustainable:
+                    responses.append(f"Trending & sustainable: {', '.join(trending_sustainable)}")
+                else:
+                    responses.append("No coins meet both trending and sustainable criteria")
+            
+            # 3. Individual checks
             if 'trending' in user_query or 'rising' in user_query:
                 trending_coins = [
                     name for name, data in self.crypto_db.items()
                     if data['price_trend'] == 'rising'
                 ]
                 if trending_coins:
-                    return f"{', '.join(trending_coins)} are currently trending upwards."
+                    responses.append(f"Trending coins: {', '.join(trending_coins)}")
                 else:
-                    return "Hmm... I couldn't find any crypto that's currently rising."
-                
-                if 'sustainable' in user_query or 'eco' in user_query:
-                    best = max(self.crypto_db, key= lambda x : self.crypto_db[x]['sustainability_score'])
-                    score = self.crypto_db[best]['sustainability_score']
-                    return f"{best} is the most sustainable crypto with a score of {score}/10."
-                return self.unknown_response
-            #Step 4 - Adding of Advice Rules
-                if "long-term" in user_query or "growth" in user_query or "profit" in user_query:
-                    recommended = [
-                        name for name, data in self.crypto_db.items()
-                if data["price_trend"] == "rising" and data["market_cap"] == "high"
-                    ]
+                    responses.append("No currently trending coins found")
+            
+            if 'sustainable' in user_query or 'eco' in user_query or 'green' in user_query:
+                best = max(self.crypto_db.items(), key=lambda x: x[1]['sustainability_score'])
+                responses.append(f"Most sustainable: {best[0]} (Score: {best[1]['sustainability_score']}/10)")
+            
+            if "long-term" in user_query or "growth" in user_query or "profit" in user_query:
+                recommended = [
+                    name for name, data in self.crypto_db.items()
+                    if data["price_trend"] == "rising" and data["market_cap"] == "high"
+                ]
                 if recommended:
-                   return f"{', '.join(recommended)} looks strong for long-term growth with rising prices and high market cap!"
-            else:
-                return "I couldn't find a coin that fits long-term growth criteria right now."
-                if "green" in user_query or "low energy" in user_query:
-                    green_cryptos = [
-                        name for name, data in self.crypto_db.items()
-                if data["energy_use"] == "low" and data["sustainability_score"] > 7
-                    ]
-                    if green_cryptos:
-                     return f"{', '.join(green_cryptos)} is super eco-friendly and a great sustainable option!"
+                    responses.append(f"Good for long-term growth: {', '.join(recommended)}")
                 else:
-                  return "None of the coins meet high sustainability and low energy use together right now."
+                    responses.append("No strong long-term options currently")
+            
+            if "low energy" in user_query:
+                green_coins = [
+                    name for name, data in self.crypto_db.items()
+                    if data["energy_use"] == "low" and data["sustainability_score"] > 7
+                ]
+                if green_coins:
+                    responses.append(f"Low-energy coins: {', '.join(green_coins)}")
+                else:
+                    responses.append("No qualifying low-energy coins found")
+            
+            # 4. Final response assembly
+            if responses:
+                return f"{'. '.join(responses)}. {self.get_random_disclaimer()}"
+            else:
+                return f"{self.unknown_response}"
+                
         except Exception as e:
-            return f"Oops! Something went wrong: {str(e)}"        
+            return f"Error: {str(e)}."
+    
 bot = CryptoBuddy()
 print(bot.greetings)
 
